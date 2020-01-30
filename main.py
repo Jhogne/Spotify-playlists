@@ -4,6 +4,8 @@ import sys
 import spotipy
 import spotipy.util as util
 
+import time
+
 def authorize(username):
     scope = 'playlist-modify-private playlist-modify-public playlist-read-private'
     token = util.prompt_for_user_token(username, scope)
@@ -60,7 +62,7 @@ else:
 sp = authorize(username)
 playlist_id = get_playlist_id(playlist_name)
 
-# Gets the first aritst id when searching for artists with the given prompt
+# Gets the first aritst id when searching for artists with each prompt
 artist_ids = []
 for name in artist_names:
     artist_ids.append(sp.search(q=name, type='artist')['artists']['items'][0]['id'])
@@ -73,7 +75,11 @@ tracks = []
 for album in albums:
     album_tracks = sp.album_tracks(album['id'])['items']
     tracks += get_fields('id', album_tracks)
+end4 = time.time()
 
 playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id))
 orig_tracks = [x['track']['id'] for x in playlist_tracks]
 add_to_playlist(username, playlist_id, list(set(tracks) - set(orig_tracks)))
+
+
+
