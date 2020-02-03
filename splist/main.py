@@ -46,40 +46,38 @@ def get_playlist_id(playlist_name):
     
     return playlist_id
 
+def main():
+    if len(sys.argv) > 3:
+        username = sys.argv[1]
+        playlist_name = sys.argv[2]
+        artist_names = sys.argv[3:len(sys.argv)]
+    else:
+        print("Usage: %s username playlist_id track_id ..." % (sys.argv[0],))
+        sys.exit()
 
+    sp = authorize(username)
+    playlist_id = get_playlist_id(playlist_name)
 
+    # Gets the first aritst id when searching for artists with each prompt
+    artist_ids = []
+    for name in artist_names:
+        artist_ids.append(sp.search(q=name, type='artist')['artists']['items'][0]['id'])
 
+    albums = []
+    for artist_id in artist_ids:
+        albums += get_all_results(sp.artist_albums(artist_id, album_type='album,single'))
 
+    tracks = []
+    for album in albums:
+        album_tracks = sp.album_tracks(album['id'])['items']
+        tracks += get_fields('id', album_tracks)
+    end4 = time.time()
 
-if len(sys.argv) > 3:
-    username = sys.argv[1]
-    playlist_name = sys.argv[2]
-    artist_names = sys.argv[3:len(sys.argv)]
-else:
-    print("Usage: %s username playlist_id track_id ..." % (sys.argv[0],))
-    sys.exit()
+    playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id))
+    orig_tracks = [x['track']['id'] for x in playlist_tracks]
+    add_to_playlist(username, playlist_id, list(set(tracks) - set(orig_tracks)))
 
-sp = authorize(username)
-playlist_id = get_playlist_id(playlist_name)
-
-# Gets the first aritst id when searching for artists with each prompt
-artist_ids = []
-for name in artist_names:
-    artist_ids.append(sp.search(q=name, type='artist')['artists']['items'][0]['id'])
-
-albums = []
-for artist_id in artist_ids:
-    albums += get_all_results(sp.artist_albums(artist_id, album_type='album,single'))
-
-tracks = []
-for album in albums:
-    album_tracks = sp.album_tracks(album['id'])['items']
-    tracks += get_fields('id', album_tracks)
-end4 = time.time()
-
-playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id))
-orig_tracks = [x['track']['id'] for x in playlist_tracks]
-add_to_playlist(username, playlist_id, list(set(tracks) - set(orig_tracks)))
-
+if __name__ == '__main__':
+    main()
 
 
