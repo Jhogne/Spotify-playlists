@@ -4,15 +4,19 @@ Spotify-playlists allows the user to easily create long playlists by adding all 
 
 ## Setup
 1. Install the dependency [spotipy](https://github.com/plamere/spotipy) and python3
-2. Create a new app and export the variables required by spotipy
+2. Navigate to the 'Spotify-playlists' directory and install the script (-e currently required)
+```
+pip3 install -e .
+```
+3. Create a new [developer app](https://developer.spotify.com/dashboard/applications) and export the variables required by spotipy
 ```
 export SPOTIPY_CLIENT_ID='your-spotify-client-id'
 export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret'
 export SPOTIPY_REDIRECT_URI='your-redirect-uri'
 ```
-3. Run program with the following syntax
+4. Run program with the following syntax
 ```
-python3 main.py 'your-username' 'playlist-name' 'artist1' 'artist2' 'artist3'
+splist 'your-username' 'playlist-name' 'artist1' 'artist2' 'artist3'
 ```
 and follow the instructions that are printed.
 
