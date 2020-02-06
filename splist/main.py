@@ -1,10 +1,8 @@
-
 import sys
 
 import spotipy
 import spotipy.util as util
-
-import time
+import argparse
 
 def authorize(username):
     scope = 'playlist-modify-private playlist-modify-public playlist-read-private'
@@ -46,14 +44,17 @@ def get_playlist_id(playlist_name, username, sp):
     
     return playlist_id
 
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-u","--username", required=True, help="Spotify username")
+    parser.add_argument("-p","--playlist", required=True, help="Playlist name")
+    parser.add_argument("-a","--artists", required=True, nargs="+", help="Artist names")
+
+    args = parser.parse_args()
+    return (args.username, args.playlist, args.artists)
+
 def main():
-    if len(sys.argv) >= 3:
-        username = sys.argv[1]
-        playlist_name = sys.argv[2]
-        artist_names = sys.argv[3:len(sys.argv)]
-    else:
-        print("Usage: %s username playlist_id track_id ..." % (sys.argv[0],))
-        sys.exit()
+    username, playlist_name, artist_names = get_arguments()
 
     sp = authorize(username)
     playlist_id = get_playlist_id(playlist_name, username, sp)
@@ -71,7 +72,6 @@ def main():
     for album in albums:
         album_tracks = sp.album_tracks(album['id'])['items']
         tracks += get_fields('id', album_tracks)
-    end4 = time.time()
 
     playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id), sp)
     orig_tracks = [x['track']['id'] for x in playlist_tracks]
@@ -79,5 +79,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
