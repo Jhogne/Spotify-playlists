@@ -16,7 +16,7 @@ export SPOTIPY_REDIRECT_URI='your-redirect-uri'
 ```
 4. Run program with the following syntax
 ```
-splist 'your-username' 'playlist-name' 'artist1' 'artist2' 'artist3'
+splist -u 'your-username' -p 'playlist-name' -a 'artist1' 'artist2' 'artist3'
 ```
 and follow the instructions that are printed.
 
