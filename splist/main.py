@@ -17,14 +17,14 @@ def authorize(username):
         print("Can't get token for", username)
     return sp    
 
-def get_all_results(results):
+def get_all_results(results, sp):
     items = results['items']
     while results['next']:
         results = sp.next(results)
         items.extend(results['items'])
     return items
 
-def add_to_playlist(username, playlist_id, tracks):
+def add_to_playlist(username, playlist_id, tracks, sp):
     chunks = [tracks[x:x+100] for x in range(0,len(tracks), 100)]
     for i in chunks:
         sp.user_playlist_add_tracks(username, playlist_id, i, position=None)
@@ -32,7 +32,7 @@ def add_to_playlist(username, playlist_id, tracks):
 def get_fields(field, l):
     return [i[field] for i in l]
 
-def get_playlist_id(playlist_name):
+def get_playlist_id(playlist_name, username, sp):
     playlists = sp.user_playlists(username)
     names = get_fields('name', playlists['items'])
     playlist_id = ''
@@ -47,7 +47,7 @@ def get_playlist_id(playlist_name):
     return playlist_id
 
 def main():
-    if len(sys.argv) > 3:
+    if len(sys.argv) >= 3:
         username = sys.argv[1]
         playlist_name = sys.argv[2]
         artist_names = sys.argv[3:len(sys.argv)]
@@ -56,7 +56,7 @@ def main():
         sys.exit()
 
     sp = authorize(username)
-    playlist_id = get_playlist_id(playlist_name)
+    playlist_id = get_playlist_id(playlist_name, username, sp)
 
     # Gets the first aritst id when searching for artists with each prompt
     artist_ids = []
@@ -65,17 +65,17 @@ def main():
 
     albums = []
     for artist_id in artist_ids:
-        albums += get_all_results(sp.artist_albums(artist_id, album_type='album,single'))
-
+        albums += get_all_results(sp.artist_albums(artist_id, album_type='album,single'), sp)
+        
     tracks = []
     for album in albums:
         album_tracks = sp.album_tracks(album['id'])['items']
         tracks += get_fields('id', album_tracks)
     end4 = time.time()
 
-    playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id))
+    playlist_tracks = get_all_results(sp.user_playlist_tracks(username,playlist_id), sp)
     orig_tracks = [x['track']['id'] for x in playlist_tracks]
-    add_to_playlist(username, playlist_id, list(set(tracks) - set(orig_tracks)))
+    add_to_playlist(username, playlist_id, list(set(tracks) - set(orig_tracks)), sp)
 
 if __name__ == '__main__':
     main()
